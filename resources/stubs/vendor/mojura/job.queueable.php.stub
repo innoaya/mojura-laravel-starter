@@ -1,0 +1,27 @@
+<?php
+
+namespace {{namespace}};
+
+use InnoAya\Mojura\Core\QueueableJob;
+use Illuminate\Contracts\Queue\ShouldQueue;
+
+class {{job}} extends QueueableJob
+{
+    /**
+     * Initializes a new instance of QueueableJob.
+     */
+    public function __construct(): void
+    {
+        //
+    }
+
+    /**
+     * Execute the job.
+     *
+     * @return void
+     */
+    public function handle(): void
+    {
+        //
+    }
+}

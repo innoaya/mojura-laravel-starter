@@ -1,0 +1,15 @@
+<?php
+use Illuminate\Support\Facades\Route;
+
+/*
+|--------------------------------------------------------------------------
+| Routes
+|--------------------------------------------------------------------------
+| Register your module routes here.
+|
+*/
+
+Route::group(['prefix' => '{{versionOrDirectory}}/{{route}}'], function() {
+
+
+});

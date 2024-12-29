@@ -1,0 +1,13 @@
+<?php
+
+namespace {{namespace}};
+
+use InnoAya\Mojura\Core\Controller;
+
+class {{controller}} extends Controller
+{
+    /**
+     * You can define functions here to serve Feature.
+     */
+
+}

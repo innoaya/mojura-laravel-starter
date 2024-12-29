@@ -1,0 +1,41 @@
+<?php
+
+namespace {{namespace}};
+
+use Illuminate\Http\Request;
+use InnoAya\Mojura\Core\Feature;
+use Illuminate\Http\JsonResponse;
+
+class {{feature}} extends Feature
+{
+
+    /**
+     * Initializes a new instance of Feature.
+     */
+    public function __construct()
+    {
+        // 
+    }
+
+    /**
+    * Execute the feature.
+    *
+    * @param Request $request
+    * @return JsonResponse
+    */
+    public function handle(Request $request): JsonResponse
+    {
+        try {
+            // You can write your code here to run the specific Job.
+
+            // Replace with the result of the Job run and any additional messages
+            $data = [];
+
+            // Returns the appropriate response based on the result of a job run.
+            return new JsonResponse($data, 200);
+        } catch (\Exception $e) {
+            // Handle exceptions and return an error response
+            return new JsonResponse(['error' => $e->getMessage()], 500);
+        }
+    }
+}
