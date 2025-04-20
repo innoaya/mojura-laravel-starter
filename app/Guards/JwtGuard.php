@@ -14,11 +14,8 @@ use Lcobucci\JWT\Configuration;
 class JwtGuard implements Guard
 {
     protected $user;
-
     protected UserProvider $provider;
-
     protected Request $request;
-
     protected Configuration $config;
 
     public function __construct(UserProvider $provider, Request $request)
@@ -30,12 +27,12 @@ class JwtGuard implements Guard
 
     public function check()
     {
-        return ! is_null($this->user());
+        return !is_null($this->user());
     }
 
     public function guest()
     {
-        return ! $this->check();
+        return !$this->check();
     }
 
     public function user()
@@ -46,27 +43,41 @@ class JwtGuard implements Guard
 
         try {
             $token = $this->request->bearerToken();
-            if (! $token) {
+            if (!$token) {
                 return null;
             }
 
             $token = $this->config->parser()->parse($token);
-            if (! method_exists($token, 'claims')) {
+            if (!method_exists($token, 'claims')) {
                 return null;
             }
 
-            $constraints = $this->config->validationConstraints();
-            if (! empty($constraints)) {
+            // Always validate the token signature
+            try {
+                $constraints = $this->config->validationConstraints();
                 $this->config->validator()->assert($token, ...$constraints);
+
+                // Explicitly verify the token was signed with our key
+                if (!$this->config->validator()->validate(
+                    $token,
+                    new \Lcobucci\JWT\Validation\Constraint\SignedWith(
+                        $this->config->signer(),
+                        $this->config->verificationKey()
+                    )
+                )) {
+                    return null;
+                }
+            } catch (\Exception $e) {
+                return null;
             }
 
             $id = $token->claims()->get('sub');
-            if (! $id) {
+            if (!$id) {
                 return null;
             }
 
             $user = User::where('id', $id)->first();
-            if (! $user) {
+            if (!$user) {
                 return null;
             }
 
@@ -91,7 +102,7 @@ class JwtGuard implements Guard
 
     public function hasUser()
     {
-        return ! is_null($this->user);
+        return !is_null($this->user);
     }
 
     public function setUser($user)
@@ -103,10 +114,10 @@ class JwtGuard implements Guard
 
     private function validateToken($token)
     {
-        if (! $this->hasUser()) {
+        if (!$this->hasUser()) {
             throw new \Exception('No user set');
         }
-        if (! method_exists($token, 'claims')) {
+        if (!method_exists($token, 'claims')) {
             throw new \Exception('Invalid token');
         }
 
@@ -118,7 +129,7 @@ class JwtGuard implements Guard
             ->where('expires_at', '>', now())
             ->exists();
 
-        if (! $recordExists) {
+        if (!$recordExists) {
             throw new \Exception('Invalid token');
         }
     }
@@ -126,10 +137,21 @@ class JwtGuard implements Guard
     public function attempt(array $credentials = [], bool $remember = false)
     {
         $user = User::where('email', $credentials['email'])->first();
-        if (! $user || ! Hash::check($credentials['password'], $user->password)) {
+        if (!$user || !Hash::check($credentials['password'], $user->password)) {
             throw new \Exception(__('auth.failed'));
         } else {
             $this->setUser($user);
         }
     }
 }
+
+// This class implements the Guard interface for JWT authentication.
+// It provides methods to check if a user is authenticated, retrieve the authenticated user,
+// validate the JWT token, and attempt to authenticate a user with credentials.
+// The class uses the JwtHelper to get the JWT configuration and the UserProvider to retrieve user data.
+// The class also uses the Request object to access the incoming request and retrieve the JWT token from the Authorization header.
+// The class uses the Lcobucci JWT library to parse and validate the JWT token.
+// The class uses the User model to interact with the users table in the database.
+// The class uses the DB facade to check if the JWT token exists in the jwt_tokens table.
+// The class uses the Hash facade to verify the password hash.
+// The class uses the Exception class to handle errors and exceptions.
